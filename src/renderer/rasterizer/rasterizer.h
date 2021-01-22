@@ -21,6 +21,7 @@ public:
 	void set_render_target(
 		std::shared_ptr<resource<RT>> in_render_target,
 		std::shared_ptr<resource<float>> in_depth_buffer = nullptr);
+
 	void clear_render_target(const RT& in_clear_value, const float in_depth = FLT_MAX);
 
 	void set_vertex_buffer(std::shared_ptr<resource<VB>> in_vertex_buffer);
@@ -49,13 +50,20 @@ inline void rasterizer<VB, RT>::set_render_target(
 	std::shared_ptr<resource<RT>> in_render_target,
 	std::shared_ptr<resource<float>> in_depth_buffer)
 {
-	THROW_ERROR("Not implemented yet");
+	if (in_render_target)
+		render_target = in_render_target;
 }
 
 template<typename VB, typename RT>
 inline void rasterizer<VB, RT>::clear_render_target(const RT& in_clear_value, const float in_depth)
 {
-	THROW_ERROR("Not implemented yet");
+	if (render_target)
+	{
+		for (size_t i = 0; i < render_target->get_number_of_elements(); i++)
+		{
+			render_target->item(i) = in_clear_value;
+		}
+	}
 }
 
 template<typename VB, typename RT>

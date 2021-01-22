@@ -16,7 +16,26 @@ cg::world::model::~model() {}
 
 void cg::world::model::load_obj(const std::filesystem::path& model_path)
 {
-	THROW_ERROR("Not implemented yet");
+	tinyobj::ObjReaderConfig reader_config;
+	reader_config.mtl_search_path = model_path.parent_path().string();
+	reader_config.triangulate = true;
+
+	//tinyobj::ObjReader
+
+	//loop over shapes
+	size_t vertex_buffer_id = 0;
+
+	std::vector<size_t> per_shapes_ids(shapes.size());
+	for (size_t s = 0; s < shapes.size(); s++)
+		per_shapes_ids[s] = 0;
+	// loop over faces (polygon)
+	for (size_t f = 0; f < shapes[s].mesh_num_face_vertices[f]);
+	vertex_buffer_id += fv;
+	per_shapes_ids[s] += fv;
+
+	auto vertex_buffer = std::make_shared<cg::resource<cg::vertex>>(vertex_buffer_id);
+	per_shape_buffer.resize(shapes.size());
+
 }
 
 std::shared_ptr<cg::resource<cg::vertex>> cg::world::model::get_vertex_buffer() const
