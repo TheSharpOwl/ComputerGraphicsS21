@@ -19,32 +19,34 @@ cg::world::camera::~camera() {}
 
 void cg::world::camera::set_position(float3 in_position)
 {
-	THROW_ERROR("Not implemented yet");
+	position = in_position;
 }
 
 void cg::world::camera::set_theta(float in_theta)
 {
-	THROW_ERROR("Not implemented yet");
+	theta = in_theta * static_cast<float>(M_PI)/180.f;
 }
 
 void cg::world::camera::set_phi(float in_phi)
 {
-	THROW_ERROR("Not implemented yet");
+	phi = in_phi * static_cast<float>(M_PI)/180.f;
 }
 
 void cg::world::camera::set_angle_of_view(float in_aov)
 {
-	THROW_ERROR("Not implemented yet");
+	angle_of_view = in_aov * static_cast<float>(M_PI) / 180.f;
 }
 
 void cg::world::camera::set_height(float in_height)
 {
-	THROW_ERROR("Not implemented yet");
+	height = in_height;
+	aspect_ratio = width / height;
 }
 
 void cg::world::camera::set_width(float in_width)
 {
-	THROW_ERROR("Not implemented yet");
+	width = in_width;
+	aspect_ratio = width / height;
 }
 
 void cg::world::camera::set_z_near(float in_z_near)
@@ -75,8 +77,11 @@ const float4x4 cg::world::camera::get_view_matrix() const
 #ifdef DX12
 const DirectX::XMMATRIX cg::world::camera::get_dxm_view_matrix() const
 {
-	THROW_ERROR("Not implemented yet");
-	return DirectX::XMMatrixIdentity();
+	DirectX::FXMVECTOR eye_position = { position.x, position.y, position.z };
+	float3 direction = get_direction();
+	DirectX::FXMVECTOR up_direction = { 0.f, 1.f, 0.f };
+	DirectX::FXMVECTOR eye_direction = { direction.x, direction.y, direction.z };
+	return DirectX::XMMatrixLookToRH(eye_position, eye_direction, up_direction);
 }
 
 const DirectX::XMMATRIX cg::world::camera::get_dxm_projection_matrix() const
@@ -89,30 +94,33 @@ const DirectX::XMMATRIX cg::world::camera::get_dxm_projection_matrix() const
 const float4x4 cg::world::camera::get_projection_matrix() const
 {
 	float f = 1.f / std::tanf(angle_of_view / 2.f);
-	// will do it soon with other stuff lol
-	return float4x4{};
+	return float4x4{
+		{ f / aspect_ratio, 0, 0, 0 },
+		{ 0, f, 0, 0 },
+		{ 0, 0, z_far / (z_near - z_far), -1 },
+		{ 0, 0, (z_far * z_near) / (z_near - z_far), 0}
+	};
 }
 
 const float3 cg::world::camera::get_position() const
 {
-	THROW_ERROR("Not implemented yet");
-	return float3{};
+	return position;
 }
 
 const float3 cg::world::camera::get_direction() const
 {
-	THROW_ERROR("Not implemented yet");
-	return float3{};
+	return float3{
+		std::sin(theta) * std::cos(phi),
+		std::sin(phi),
+		-std::cos(theta) * std::cos(phi)};
 }
 
 const float3 cg::world::camera::get_right() const
 {
-	THROW_ERROR("Not implemented yet");
-	return float3{};
+	return cross(get_direction(),float3(0.f, 1.f, 0.f));
 }
 
 const float3 cg::world::camera::get_up() const
 {
-	THROW_ERROR("Not implemented yet");
-	return float3{};
+	return cross(get_right(), get_direction());
 }

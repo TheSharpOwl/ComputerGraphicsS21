@@ -131,6 +131,35 @@ struct vertex
 	float emissive_r;
 	float emissive_g;
 	float emissive_b;
+
+
+	inline static vertex vertex::interpolate_bary(
+		const vertex& v1, const vertex& v2, const vertex& v3, float u, float v, float w)
+	{
+		vertex result;
+
+		result.x = v1.x * u + v2.x * v + v3.x * w;
+		result.y = v1.y * u + v2.y * v + v3.y * w;
+		result.z = v1.z * u + v2.z * v + v3.z * w;
+
+		result.nx = v1.nx * u + v2.nx * v + v3.nx * w;
+		result.ny = v1.ny * u + v2.ny * v + v3.ny * w;
+		result.nz = v1.nz * u + v2.nz * v + v3.nz * w;
+
+		result.ambient_r = v1.ambient_r * u + v2.ambient_r * v + v3.ambient_r * w;
+		result.ambient_g = v1.ambient_g * u + v2.ambient_g * v + v3.ambient_g * w;
+		result.ambient_b = v1.ambient_b * u + v2.ambient_b * v + v3.ambient_b * w;
+
+		result.diffuse_r = v1.diffuse_r * u + v2.diffuse_r * v + v3.diffuse_r * w;
+		result.diffuse_g = v1.diffuse_g * u + v2.diffuse_g * v + v3.diffuse_g * w;
+		result.diffuse_b = v1.diffuse_b * u + v2.diffuse_b * v + v3.diffuse_b * w;
+
+		result.emissive_r = v1.emissive_r * u + v2.emissive_r * v + v3.emissive_r * w;
+		result.emissive_g = v1.emissive_g * u + v2.emissive_g * v + v3.emissive_g * w;
+		result.emissive_b = v1.emissive_b * u + v2.emissive_b * v + v3.emissive_b * w;
+
+		return result;
+	}
 };
 
 } // namespace cg
