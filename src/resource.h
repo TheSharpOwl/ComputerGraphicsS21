@@ -96,14 +96,24 @@ struct unsigned_color
 {
 	static unsigned_color from_color(const color& color)
 	{
-		THROW_ERROR("Not implemented yet");
-		return unsigned_color();
+		int r,g,b;
+		r = std::clamp(static_cast<int>(255.f * color.r), 0, 255);
+		g = std::clamp(static_cast<int>(255.f * color.g), 0, 255);
+		b = std::clamp(static_cast<int>(255.f * color.b), 0, 255);
+		return unsigned_color(r, g, b);
+
 	};
 	float3 to_float3()
 	{
-		THROW_ERROR("Not implemented yet");
-		return float3();
+		float r,g,b;
+		r = static_cast<float>(this->r)/255.f;
+		g = static_cast<float>(this->g)/255.f;
+		b = static_cast<float>(this->b)/255.f;
+		return float3(r,g,b);
 	};
+
+	unsigned_color(int R, int G, int B) : r(R), g(G), b(B) {}
+	unsigned_color(){};
 	unsigned char r;
 	unsigned char g;
 	unsigned char b;
