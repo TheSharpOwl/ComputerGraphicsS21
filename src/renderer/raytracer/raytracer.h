@@ -143,13 +143,16 @@ protected:
 template<typename VB, typename RT>
 inline void raytracer<VB, RT>::set_render_target(std::shared_ptr<resource<RT>> in_render_target)
 {
-	THROW_ERROR("Not implemented yet");
+	render_target = in_render_target;
 }
 
 template<typename VB, typename RT>
 inline void raytracer<VB, RT>::clear_render_target(const RT& in_clear_value)
 {
-	THROW_ERROR("Not implemented yet");
+	for(size_t i = 0; i < render_target->get_number_of_elements();i++)
+	{
+		render_target->item(i) = in_clear_value;
+	}
 }
 
 template<typename VB, typename RT>
