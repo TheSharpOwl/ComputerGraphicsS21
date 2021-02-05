@@ -16,7 +16,7 @@ struct ray
 {
 	ray(float3 position, float3 direction) : position(position)
 	{
-		THROW_ERROR("Not implemented yet");
+		this->direction = normalize(direction);
 	}
 	float3 position;
 	float3 direction;
@@ -171,21 +171,39 @@ inline void raytracer<VB, RT>::build_acceleration_structure()
 template<typename VB, typename RT>
 inline void raytracer<VB, RT>::set_viewport(size_t in_width, size_t in_height)
 {
-	THROW_ERROR("Not implemented yet");
+	width = in_width;
+	height = in_height;
 }
 
 template<typename VB, typename RT>
 inline void raytracer<VB, RT>::ray_generation(
 	float3 position, float3 direction, float3 right, float3 up)
 {
-	THROW_ERROR("Not implemented yet");
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+			// [0, width -1] to [-1, 1]
+			float u, v;
+			u = 2.f * x / static_cast<float>(width - 1) - 1.f;
+			u *= static_cast<float>(width) / static_cast<float>(height);
+			v = 2.f * y / static_cast<float>(height - 1) - 1.f;
+			float3 rayDirection = direction + u * right - v * up;
+			ray ray(position, rayDirection);
+
+				payload payload = trace_ray(ray, 1);
+
+			render_target->item(x, y) = RT::from_color(payload.color);
+
+		}
+	}
 }
 
 template<typename VB, typename RT>
 inline payload
 	raytracer<VB, RT>::trace_ray(const ray& ray, size_t depth, float max_t, float min_t) const
 {
-	THROW_ERROR("Not implemented yet");
+	return miss_shader(ray);
 }
 
 template<typename VB, typename RT>
