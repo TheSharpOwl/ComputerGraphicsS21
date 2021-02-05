@@ -116,7 +116,7 @@ public:
 	void set_per_shape_vertex_buffer(
 		std::vector<std::shared_ptr<cg::resource<VB>>> in_per_shape_vertex_buffer);
 	void build_acceleration_structure();
-	std::vector<aabb<VB>> acceleration_structures;
+	std::vector<triangle<VB>> acceleration_structures;
 
 	void ray_generation(float3 position, float3 direction, float3 right, float3 up);
 
@@ -159,13 +159,24 @@ template<typename VB, typename RT>
 inline void raytracer<VB, RT>::set_per_shape_vertex_buffer(
 	std::vector<std::shared_ptr<cg::resource<VB>>> in_per_shape_vertex_buffer)
 {
-	THROW_ERROR("Not implemented yet");
+	per_shape_vertex_buffer = in_per_shape_vertex_buffer;
 }
 
 template<typename VB, typename RT>
 inline void raytracer<VB, RT>::build_acceleration_structure()
 {
-	THROW_ERROR("Not implemented yet");
+	for (auto& vertex_buffer : per_shape_vertex_buffer)
+	{
+		size_t vertex_id = 0;
+		while (vertex_id < vertex_buffer->get_number_of_elements())
+		{
+			triangle<VB> triangle(
+				vertex_buffer->item(vertex_id++), vertex_buffer->item(vertex_id++),
+				vertex_buffer->item(vertex_id++));
+
+			acceleration_structures.push_back(triangle);
+		}
+	}
 }
 
 template<typename VB, typename RT>
@@ -203,6 +214,34 @@ template<typename VB, typename RT>
 inline payload
 	raytracer<VB, RT>::trace_ray(const ray& ray, size_t depth, float max_t, float min_t) const
 {
+	if (depth == 0)
+		return miss_shader(ray);
+
+	depth--;
+	payload closest_hit_payload = {};
+	closest_hit_payload.t = max_t;
+	const triangle<VB>* closest_triangle = nullptr;
+
+	for (auto& triangle : acceleration_structures)
+	{
+		payload payload = intersection_shader(triangle, ray);
+		if (payload.t > min_t && payload.t < closest_hit_payload.t)
+		{
+			closest_hit_payload = payload;
+			closest_triangle = &triangle;
+
+			if (any_hit_shader)
+				return any_hit_shader(ray, payload, triangle);
+		}
+	}
+
+
+	if (closest_hit_payload.t < max_t)
+	{
+		if (closest_hit_shader)
+			return closest_hit_shader(ray, closest_hit_payload, *closest_triangle);
+	}
+
 	return miss_shader(ray);
 }
 
@@ -210,8 +249,30 @@ template<typename VB, typename RT>
 inline payload
 	raytracer<VB, RT>::intersection_shader(const triangle<VB>& triangle, const ray& ray) const
 {
-	THROW_ERROR("Not implemented yet");
-	return payload{};
+	payload payload{};
+	payload.t = -1.f;
+
+	float3 pvec = cross(ray.direction, triangle.ca);
+	float det = dot(triangle.ba, pvec);
+
+	const float epsilon = 1e-8f;
+	if (abs(det) < epsilon)
+		return payload;
+
+	float inv_det = 1.f / det;
+	float3 tvec = ray.position - triangle.a;
+	float u = dot(tvec, pvec) * inv_det;
+	if (u < 0.f || u > 1.f)
+		return payload;
+
+	float3 qvec = cross(tvec, triangle.ba);
+	float v = dot(ray.direction, qvec) * inv_det;
+	if (v < 0.f || (u + v) > 1.f)
+		return payload;
+
+	payload.t = dot(triangle.ca, qvec) * inv_det;
+	payload.bary = float3{ 1.f - u - v, u, v };
+	return payload;
 }
 
 template<typename VB, typename RT>
