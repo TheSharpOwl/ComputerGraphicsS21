@@ -47,7 +47,7 @@ inline resource<T>::resource(size_t x_size, size_t y_size)
 template<typename T>
 inline resource<T>::~resource()
 {
-
+	data.clear();
 }
 template<typename T>
 inline const T* resource<T>::get_data()

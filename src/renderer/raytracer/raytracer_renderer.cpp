@@ -23,6 +23,7 @@ void cg::renderer::ray_tracing_renderer::init()
 	camera->set_z_far(settings->camera_z_far);
 	camera->set_z_near(settings->camera_z_near);
 
+
 	raytracer = std::make_shared<cg::renderer::raytracer<cg::vertex, cg::unsigned_color>>();
 
 	shadow_raytracer = std::make_shared<cg::renderer::raytracer<cg::vertex, cg::unsigned_color>>();
@@ -38,6 +39,12 @@ void cg::renderer::ray_tracing_renderer::destroy() {}
 
 void cg::renderer::ray_tracing_renderer::update() {}
 
+inline float smoothstep(float edge0, float edge1, float x) 
+{
+	x = std::clamp((x - edge0) / (edge1 - edge0), 0.f, 1.f);
+	return x * x * (3 - 2 * x);
+}
+
 void cg::renderer::ray_tracing_renderer::render()
 {
 	raytracer->clear_render_target({ 255, 255, 100 });
@@ -45,10 +52,19 @@ void cg::renderer::ray_tracing_renderer::render()
 	raytracer->miss_shader =
 		[](const ray& ray)
 	{
-		payload payload{};
-		payload.t = -1.f;
-		payload.color = { ray.direction.x * 0.5f + 0.5f, ray.direction.y * 0.5f + 0.5f,
-						  ray.direction.z * 0.5f + 0.5f };
+		payload payload;
+		float3 ground = float3(0.8f, 0.7f, 0.7f);
+		float3 sky = float3(77.f / 255.f, 174.f / 255.f, 219.f / 255.f);
+		float t = smoothstep(0.f, 0.5f, ray.direction.y + 0.5f);
+		float3 color = ground * (1 - t) + sky * t;
+		payload.color = cg::color::from_float3(color);
+
+		payload.t = t;
+
+		// payload.t = -1.f;
+		/*payload.color = { ray.direction.x * 0.5f + 0.5f, ray.direction.y * 0.5f + 0.5f,
+						  ray.direction.z * 0.5f + 0.5f };*/
+
 		//payload.color = { 200.f, 255.f, (ray.direction.y + 1.0f) * 0.5f };
 		return payload;
 	};
@@ -93,7 +109,9 @@ void cg::renderer::ray_tracing_renderer::render()
 	};
 
 	raytracer->build_acceleration_structure();
+
 	shadow_raytracer->acceleration_structures = raytracer->acceleration_structures;
+
 	raytracer->ray_generation(camera->get_position(),
 		camera->get_direction(),
 		camera->get_right(),
