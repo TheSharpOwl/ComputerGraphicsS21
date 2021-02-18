@@ -26,6 +26,8 @@ struct settings
 
 	std::string renderer_type;
 
+	bool smooth_shading = true;
+
 	std::filesystem::path result_path;
 
 	unsigned accumulation_num;
