@@ -86,8 +86,7 @@ const DirectX::XMMATRIX cg::world::camera::get_dxm_view_matrix() const
 
 const DirectX::XMMATRIX cg::world::camera::get_dxm_projection_matrix() const
 {
-	THROW_ERROR("Not implemented yet");
-	return DirectX::XMMatrixIdentity();
+	return DirectX::XMMatrixPerspectiveFovRH(angle_of_view, aspect_ratio, z_near, z_far);
 }
 #endif
 
