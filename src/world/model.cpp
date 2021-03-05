@@ -69,7 +69,7 @@ void cg::world::model::load_obj(const std::filesystem::path& model_path)
 						per_shape_vertex_size;
 					per_shape_vertex_size++;
 				}
-				per_shape_vertex_size++;
+				per_shape_index_size++;
 			}
 			index_offset += shapes[s].mesh.num_face_vertices[f];
 		}
@@ -77,25 +77,21 @@ void cg::world::model::load_obj(const std::filesystem::path& model_path)
 
 		per_shape_index_buffer.push_back(std::make_shared<cg::resource<unsigned int>>(per_shape_index_size));
 
-		vertex_buffer = std::make_shared<cg::resource<cg::vertex>>(vertex_buffer);
-		index_buffer = std::make_shared<cg::resource<unsigned int>>(index_buffer_id);
+		
 
-		index_map.clear();
-		per_shape_index_maps.clear();
-		per_shape_index_maps.resize(shapes.size());
+		
 	}
 
 	vertex_buffer = std::make_shared<cg::resource<cg::vertex>>(vertex_buffer_id);
-	per_shape_buffer.resize(shapes.size());
+	index_buffer = std::make_shared<cg::resource<unsigned int>>(index_buffer_id);
 
-	for (size_t s = 0; s < shapes.size(); s++)
-	{
-		per_shape_buffer[s] =
-			std::make_shared<cg::resource<cg::vertex>>(per_shape_ids[s]);
-	}
+	index_map.clear();
+	per_shape_index_maps.clear();
+	per_shape_index_maps.resize(shapes.size());
 
 	// Loop over shapes
 	vertex_buffer_id = 0;
+	index_buffer_id = 0;
 	for (size_t s = 0; s < shapes.size(); s++)
 	{
 		size_t per_shape_id = 0;
@@ -178,12 +174,8 @@ void cg::world::model::load_obj(const std::filesystem::path& model_path)
 						vertex.emissive_b = material.emission[2];
 					}
 
-					vertex_buffer->item(vertex_buffer_id++) = vertex;
-					per_shape_buffer[s]->item(per_shape_id++) = vertex;
-
-					tinyobj::real_t red = attrib.colors[3 * idx.vertex_index + 0];
-					tinyobj::real_t green = attrib.colors[3 * idx.vertex_index + 1];
-					tinyobj::real_t blue = attrib.colors[3 * idx.vertex_index + 2];
+					index_map[idx_tuple] = vertex_buffer_id;
+					vertex_buffer_id++;
 				}
 
 				index_buffer->item(index_buffer_id) = index_map[idx_tuple];
