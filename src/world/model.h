@@ -21,6 +21,9 @@ public:
 	std::shared_ptr<cg::resource<cg::vertex>> get_vertex_buffer() const;
 	std::vector<std::shared_ptr<cg::resource<cg::vertex>>> get_per_shape_buffer() const;
 
+	std::shared_ptr<cg::resource<unsigned int>> get_index_buffer() const;
+	std::vector<std::shared_ptr<cg::resource<unsigned int>>> get_per_shape_index_buffer() const;
+
 	const float4x4 get_world_matrix() const;
 
 protected:
@@ -30,5 +33,8 @@ protected:
 
 	std::shared_ptr<cg::resource<cg::vertex>> vertex_buffer;
 	std::vector<std::shared_ptr<cg::resource<cg::vertex>>> per_shape_buffer;
+
+	std::shared_ptr<cg::resource<unsigned int>> index_buffer;
+	std::vector<std::shared_ptr<cg::resource<unsigned int>>> per_shape_index_buffer;
 };
 } // namespace cg::world
